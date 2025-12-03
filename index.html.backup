@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English is Power - Nurturing young recruits</title>
+
+    <!-- Tailwind CSS with Typography Plugin -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <!-- React & ReactDOM (UMD) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Lucide Icons (UMD) - Corrected Link -->
+    <script crossorigin src="https://unpkg.com/lucide-react@0.469.0/dist/umd/lucide-react.min.js"></script>
+
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Custom scrollbar */
+        .preview-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .preview-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .preview-scroll::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .preview-scroll::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.3s ease-out forwards;
+        }
+
+        /* Editor Placeholder */
+        [contenteditable]:empty:before {
+            content: attr(data-placeholder);
+            color: #94a3b8;
+            font-style: italic;
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
+  }
+}
+</script>
+</head>
+
+<body class="bg-gray-50 text-slate-800 antialiased">
+    <div id="root"></div>
+
+    <script type="text/babel" data-presets="env,react,typescript">
+        const { useState, useEffect, useRef } = React;
+
+        // Destructure Icons from global lucideReact object
+        // Ensure we handle potential missing global gracefully, though the script tag should provide it
+        const Icons = window.lucideReact || window.lucide || {};
+
+        // --- SUPABASE CONFIGURATION ---
+        const SUPABASE_URL = 'https://lkgqvkbpucfqpflhnfdm.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxrZ3F2a2JwdWNmcXBmbGhuZmRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2NDUxNzEsImV4cCI6MjA4MDIyMTE3MX0.0BFei9G4m82JjmqQuqc3D7Hx9fL1ifLycagYiq32qCA';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const {
+            Search, Menu, X, ChevronDown, ChevronRight, Phone, Mail, GraduationCap,
+            Trash2, LogIn, Lock, FilePlus, Download, Eye, FileText, Copy, Check, FolderOpen,
+            Bold, Italic, Underline, List, ListOrdered, AlignLeft, AlignCenter, AlignRight,
+            Heading1, Heading2, Quote
+        } = Icons;
+
+        // --- CONSTANTS ---
+        const APP_NAME = "English is Power";
+        const TAGLINE = "Nurturing young recruits with pride and care";
+
+        const NAV_STRUCTURE = [
+            { label: "Home", id: "home" },
+            { label: "Literature", id: "literature" },
+            { label: "Grammar", id: "grammar" },
+            { label: "Paragraph", id: "paragraph" },
+            { label: "Composition", id: "composition" },
+            { label: "Dialogue", id: "dialogue" },
+            { label: "Completing Story", id: "completing-story" },
+            { label: "Report", id: "report" },
+            { label: "Formal Letter", id: "formal-letter" },
+            { label: "Informal Letter", id: "informal-letter" },
+            { label: "Formal Email", id: "formal-email" },
+            { label: "Informal Email", id: "informal-email" },
+            { label: "Graph/Chart", id: "graph-chart" },
+            { label: "Vocabulary", id: "vocabulary" },
+            {
+                label: "Account",
+                children: [
+                    { label: "Admin Dashboard", id: "admin" },
+                    { label: "Student Login", id: "student-login" },
+                    { label: "Teacher Portal", id: "teacher-portal" },
+                ],
+            },
+        ];
+
+        // --- COMPONENTS ---
+
+        // 1. Rich Text Editor
+        const RichTextEditor = ({ value, onChange, placeholder }) => {
+            const editorRef = useRef(null);
+
+            useEffect(() => {
+                if (editorRef.current && editorRef.current.innerHTML !== value) {
+                    if (value === '' || editorRef.current.innerHTML === '<br>') {
+                        editorRef.current.innerHTML = value;
+                    }
+                }
+            }, [value]);
+
+            const execCommand = (command, value = undefined) => {
+                document.execCommand(command, false, value);
+                if (editorRef.current) {
+                    onChange(editorRef.current.innerHTML);
+                }
+            };
+
+            const handleInput = () => {
+                if (editorRef.current) {
+                    onChange(editorRef.current.innerHTML);
+                }
+            };
+
+            const ToolbarButton = ({ icon: Icon, command, arg, title }) => (
+                <button
+                    type="button"
+                    onClick={() => execCommand(command, arg)}
+                    className="p-2 text-slate-600 hover:bg-slate-200 rounded transition-colors"
+                    title={title}
+                >
+                    {Icon && <Icon size={18} />}
+                </button>
+            );
+
+            return (
+                <div className="border border-slate-300 rounded-lg overflow-hidden bg-white focus-within:ring-2 focus-within:ring-teal-500 transition-all">
+                    <div className="flex flex-wrap items-center gap-1 p-2 bg-slate-50 border-b border-slate-200">
+                        <ToolbarButton icon={Bold} command="bold" title="Bold" />
+                        <ToolbarButton icon={Italic} command="italic" title="Italic" />
+                        <ToolbarButton icon={Underline} command="underline" title="Underline" />
+                        <div className="w-px h-6 bg-slate-300 mx-1"></div>
+                        <ToolbarButton icon={Heading1} command="formatBlock" arg="H1" title="Heading 1" />
+                        <ToolbarButton icon={Heading2} command="formatBlock" arg="H2" title="Heading 2" />
+                        <div className="w-px h-6 bg-slate-300 mx-1"></div>
+                        <ToolbarButton icon={List} command="insertUnorderedList" title="Bullet List" />
+                        <ToolbarButton icon={ListOrdered} command="insertOrderedList" title="Numbered List" />
+                        <ToolbarButton icon={Quote} command="formatBlock" arg="blockquote" title="Quote" />
+                        <div className="w-px h-6 bg-slate-300 mx-1"></div>
+                        <ToolbarButton icon={AlignLeft} command="justifyLeft" title="Align Left" />
+                        <ToolbarButton icon={AlignCenter} command="justifyCenter" title="Align Center" />
+                        <ToolbarButton icon={AlignRight} command="justifyRight" title="Align Right" />
+                    </div>
+
+                    <div
+                        ref={editorRef}
+                        contentEditable
+                        onInput={handleInput}
+                        className="min-h-[300px] max-h-[600px] overflow-y-auto p-4 focus:outline-none prose max-w-none prose-sm sm:prose-base text-slate-800"
+                        data-placeholder={placeholder}
+                    />
+                </div>
+            );
+        };
+
+        // 2. Navbar
+        const Navbar = ({ activeSection, onNavigate }) => {
+            const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+            const [searchQuery, setSearchQuery] = useState('');
+
+            const handleSearch = () => {
+                if (searchQuery.trim()) {
+                    alert(`Searching for: ${searchQuery}\n(Search functionality is simulated)`);
+                }
+            };
+
+            const NavItemRenderer = ({ item, depth = 0, closeMobileMenu }) => {
+                const [isOpen, setIsOpen] = useState(false);
+                const hasChildren = item.children && item.children.length > 0;
+
+                if (hasChildren) {
+                    return (
+                        <div
+                            className="relative group"
+                            onMouseEnter={() => window.innerWidth >= 1024 && setIsOpen(true)}
+                            onMouseLeave={() => window.innerWidth >= 1024 && setIsOpen(false)}
+                        >
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsOpen(!isOpen);
+                                }}
+                                className={`flex items-center gap-1 px-4 py-3 lg:py-4 text-sm font-medium transition-colors w-full lg:w-auto justify-between lg:justify-start
+                                    ${depth > 0 ? 'text-slate-700 hover:bg-slate-100' : 'text-white hover:bg-slate-700'}
+                                `}
+                            >
+                                {item.label}
+                                {depth === 0 ? (ChevronDown && <ChevronDown size={14} />) : (ChevronRight && <ChevronRight size={14} className="ml-auto lg:ml-2" />)}
+                            </button>
+
+                            <div className={`
+                                ${isOpen ? 'block' : 'hidden'}
+                                lg:absolute lg:top-full lg:left-0 lg:min-w-[220px] 
+                                ${depth > 0 ? 'lg:top-0 lg:left-full' : ''}
+                                bg-white shadow-xl rounded-b-md lg:rounded-md z-50 border-t-2 lg:border-t-0 border-slate-100
+                            `}>
+                                <ul className="py-2">
+                                    {item.children.map((child, idx) => (
+                                        <li key={idx} className="relative">
+                                            <NavItemRenderer item={child} depth={depth + 1} closeMobileMenu={closeMobileMenu} />
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    );
+                }
+
+                return (
+                    <a
+                        href="#"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (item.id) {
+                                onNavigate(item.id);
+                                closeMobileMenu();
+                            }
+                        }}
+                        className={`block px-4 py-3 lg:py-4 text-sm font-medium transition-colors
+                            ${depth > 0
+                                ? 'text-slate-700 hover:bg-teal-50 hover:text-teal-700 hover:pl-6 transition-all duration-300'
+                                : activeSection === item.id ? 'bg-teal-600 text-white' : 'text-white hover:bg-slate-700'}
+                        `}
+                    >
+                        {item.label}
+                    </a>
+                );
+            };
+
+            return (
+                <div className="flex flex-col w-full shadow-lg">
+                    {/* Top Bar */}
+                    <div className="bg-slate-800 text-slate-300 text-xs py-2 px-4 border-b border-slate-700">
+                        <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+                            <div className="flex items-center gap-6">
+                                <span className="flex items-center gap-2 hover:text-white transition-colors cursor-pointer">
+                                    {Phone && <Phone size={14} className="text-teal-400" />} 01819960639
+                                </span>
+                                <span className="flex items-center gap-2 hover:text-white transition-colors cursor-pointer">
+                                    {Mail && <Mail size={14} className="text-teal-400" />} nashidk330@gmail.com
+                                </span>
+                            </div>
+                            <div className="hidden sm:block">
+                                👋 Welcome to {APP_NAME}!!!
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Header Main */}
+                    <header className="bg-slate-900 text-white py-6">
+                        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div className="flex items-center gap-4 group cursor-pointer" onClick={() => onNavigate('home')}>
+                                <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full flex items-center justify-center shadow-lg transform group-hover:scale-105 transition-transform duration-300">
+                                    {GraduationCap && <GraduationCap size={36} className="text-white drop-shadow-md" />}
+                                </div>
+                                <div>
+                                    <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-300">
+                                        {APP_NAME}
+                                    </h1>
+                                    <p className="text-sm text-teal-400 italic font-medium">{TAGLINE}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex w-full md:w-auto shadow-md rounded-md overflow-hidden">
+                                <input
+                                    type="text"
+                                    placeholder="Search..."
+                                    className="px-4 py-2 w-full md:w-64 text-slate-800 focus:outline-none"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                />
+                                <button
+                                    onClick={handleSearch}
+                                    className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 transition-colors flex items-center gap-2"
+                                >
+                                    {Search && <Search size={18} />}
+                                    <span className="hidden md:inline">Search</span>
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Navigation Bar */}
+                    <nav className="bg-slate-800 sticky top-0 z-40 border-t border-slate-700">
+                        <div className="max-w-7xl mx-auto px-4">
+                            <div className="flex justify-between items-center lg:block">
+                                <div className="hidden">
+                                    Menu
+                                </div>
+                                <button
+                                    className="lg:hidden w-full py-3 px-2 text-white font-medium flex items-center justify-between hover:bg-slate-700 rounded transition-colors"
+                                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                >
+                                    <span className="flex items-center gap-2">Menu</span>
+                                    <span>{mobileMenuOpen ? (X ? <X size={24} /> : 'X') : (Menu ? <Menu size={24} /> : '☰')}</span>
+                                </button>
+                            </div>
+
+                            <ul className={`
+                                lg:flex lg:flex-wrap
+                                ${mobileMenuOpen ? 'block' : 'hidden'}
+                                pb-4 lg:pb-0
+                                max-h-[70vh] overflow-y-auto lg:max-h-none lg:overflow-visible
+                            `}>
+                                {NAV_STRUCTURE.map((item, idx) => (
+                                    <li key={idx} className="border-b border-slate-700 lg:border-none last:border-none">
+                                        <NavItemRenderer item={item} closeMobileMenu={() => setMobileMenuOpen(false)} />
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </nav>
+                </div>
+            );
+        };
+
+        // 3. Footer
+        const Footer = () => {
+            return (
+                <footer className="bg-slate-900 text-white pt-12 pb-6 mt-20">
+                    <div className="max-w-7xl mx-auto px-4 text-center">
+                        <div className="mb-8">
+                            <h2 className="text-2xl font-serif mb-2">{APP_NAME}</h2>
+                            <p className="text-slate-400 italic">Nurturing young recruits with pride and care.</p>
+                        </div>
+
+                        <div className="h-px w-full bg-slate-800 mb-8 max-w-2xl mx-auto"></div>
+
+                        <div className="text-sm text-slate-300 space-y-2">
+                            <p>
+                                &copy; {new Date().getFullYear()} English is Power. All rights reserved.
+                            </p>
+                            <p className="font-medium text-teal-400">
+                                All rights reserved by Nashid Kamal, Assistant Teacher, Narayanganj Ideal School
+                            </p>
+                            <div className="pt-4 text-xs text-slate-500">
+                                Contact: 01819960639 | nashidk330@gmail.com
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            );
+        };
+
+        // 4. Preview Modal
+        const PreviewModal = ({ resource, isOpen, onClose }) => {
+            const [copied, setCopied] = useState(false);
+
+            if (!isOpen || !resource) return null;
+
+            const handleDownload = () => {
+                const blob = new Blob([resource.fileContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = resource.fileName || `${resource.title}.html`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            };
+
+            const handleCopy = () => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = resource.fileContent;
+                const text = tempDiv.innerText;
+
+                navigator.clipboard.writeText(text).then(() => {
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                });
+            };
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+                    <div
+                        className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-slide-up"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="px-6 py-4 bg-slate-800 text-white flex justify-between items-center shrink-0">
+                            <div className="flex items-center gap-3">
+                                {FileText && <FileText size={20} />}
+                                <div>
+                                    <h2 className="text-lg font-semibold truncate max-w-md">{resource.title}</h2>
+                                    <p className="text-xs text-slate-400">Published: {resource.uploadDate}</p>
+                                </div>
+                            </div>
+                            <button onClick={onClose} className="p-1 hover:bg-slate-700 rounded-full transition-colors">
+                                {X && <X size={24} />}
+                            </button>
+                        </div>
+
+                        <div className="p-8 overflow-y-auto bg-gray-50 flex-1 preview-scroll">
+                            <div className="bg-white p-8 rounded shadow-sm border border-gray-100 min-h-[400px]">
+                                <div
+                                    className="prose max-w-none prose-slate prose-headings:font-serif prose-a:text-teal-600 hover:prose-a:text-teal-700"
+                                    dangerouslySetInnerHTML={{ __html: resource.fileContent }}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="px-6 py-4 border-t border-gray-200 bg-white flex justify-end gap-3 shrink-0">
+                            <button
+                                onClick={handleCopy}
+                                className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors font-medium flex items-center gap-2"
+                            >
+                                {copied ? (Check && <Check size={18} className="text-green-600" />) : (Copy && <Copy size={18} />)}
+                                {copied ? "Copied Text" : "Copy Text"}
+                            </button>
+
+                            <button
+                                onClick={handleDownload}
+                                className="px-6 py-2 bg-teal-600 text-white hover:bg-teal-700 rounded-lg transition-colors font-medium flex items-center gap-2 shadow-sm"
+                            >
+                                {Download && <Download size={18} />} Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 5. Admin Panel
+        const AdminPanel = ({ resources, onUpload, onDelete }) => {
+            const [isAuthenticated, setIsAuthenticated] = useState(false);
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            const [loading, setLoading] = useState(false);
+
+            // Form State
+            const [title, setTitle] = useState('');
+            const [category, setCategory] = useState('');
+            const [content, setContent] = useState('');
+
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setError('');
+
+                try {
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password,
+                    });
+
+                    if (error) throw error;
+
+                    setIsAuthenticated(true);
+                } catch (err) {
+                    setError(err.message || 'Invalid credentials.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const flattenCategories = (items) => {
+                let result = [];
+                items.forEach(item => {
+                    if (item.children) {
+                        result = [...result, ...flattenCategories(item.children)];
+                    } else if (item.id && !['home', 'admin', 'student-login', 'teacher-portal'].includes(item.id)) {
+                        result.push({ label: item.label, id: item.id });
+                    }
+                });
+                return result;
+            };
+
+            const categories = flattenCategories(NAV_STRUCTURE);
+
+            const handleUpload = async (e) => {
+                e.preventDefault();
+                if (!title || !category || !content) {
+                    alert('Please fill in all required fields (Title, Category, Content)');
+                    return;
+                }
+
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = content;
+                const plainText = tempDiv.textContent || tempDiv.innerText || '';
+                const summary = plainText.substring(0, 150) + (plainText.length > 150 ? '...' : '');
+
+                const blob = new Blob([content], { type: 'text/html' });
+                const sizeKB = (blob.size / 1024).toFixed(2) + ' KB';
+
+                const newResource = {
+                    title,
+                    category,
+                    description: summary,
+                    file_name: `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.html`,
+                    file_size: sizeKB,
+                    upload_date: new Date().toLocaleDateString(),
+                    file_type: 'text/html',
+                    file_content: content,
+                    file_extension: 'html'
+                };
+
+                try {
+                    const { data, error } = await supabase
+                        .from('resources')
+                        .insert([newResource])
+                        .select();
+
+                    if (error) throw error;
+
+                    if (data) {
+                        const formatted = {
+                            ...data[0],
+                            fileName: data[0].file_name,
+                            fileSize: data[0].file_size,
+                            uploadDate: data[0].upload_date,
+                            fileType: data[0].file_type,
+                            fileContent: data[0].file_content,
+                            fileExtension: data[0].file_extension,
+                            id: data[0].id
+                        };
+                        onUpload(formatted);
+
+                        setTitle('');
+                        setCategory('');
+                        setContent('');
+                        alert('Content published successfully!');
+                    }
+                } catch (err) {
+                    console.error('Error uploading:', err);
+                    alert('Failed to publish content: ' + err.message);
+                }
+            };
+
+            if (!isAuthenticated) {
+                return (
+                    <div className="max-w-md mx-auto mt-10 p-8 bg-white rounded-xl shadow-lg border border-slate-100">
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                {Lock && <Lock size={32} className="text-slate-600" />}
+                            </div>
+                            <h2 className="text-2xl font-bold text-slate-800">Admin Access</h2>
+                            <p className="text-slate-500">Please enter credentials to continue</p>
+                        </div>
+
+                        <form onSubmit={handleLogin} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                                <input
+                                    type="email"
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="admin@example.com"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                                <input
+                                    type="password"
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Enter admin password"
+                                />
+                            </div>
+                            {error && <p className="text-red-500 text-sm">{error}</p>}
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-slate-800 text-white py-2.5 rounded-lg hover:bg-slate-900 transition-colors font-medium flex justify-center items-center gap-2 disabled:opacity-50"
+                            >
+                                {loading ? 'Logging in...' : (
+                                    <>
+                                        {LogIn && <LogIn size={18} />} Login
+                                    </>
+                                )}
+                            </button>
+                        </form>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="space-y-10">
+                    <div className="bg-white p-8 rounded-xl shadow-md border border-slate-100">
+                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                            {FilePlus && <FilePlus size={24} className="text-teal-600" />}
+                            <h2 className="text-2xl font-bold text-slate-800">Create New Content</h2>
+                        </div>
+
+                        <form onSubmit={handleUpload} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Title *</label>
+                                    <input
+                                        type="text"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
+                                        placeholder="e.g., The Art of Essay Writing"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">Category *</label>
+                                    <select
+                                        value={category}
+                                        onChange={(e) => setCategory(e.target.value)}
+                                        className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none bg-white"
+                                        required
+                                    >
+                                        <option value="">Select Category</option>
+                                        {categories.map((cat, idx) => (
+                                            <option key={idx} value={cat.id}>{cat.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Content / Description *</label>
+                                <p className="text-xs text-slate-500 mb-2">Use the toolbar to format your text. You can add headers, lists, and styles.</p>
+                                <RichTextEditor
+                                    value={content}
+                                        <div className="space-y-12 animate-fade-in">
+                                    <div className="w-full flex justify-center py-6">
+                                        <div className="relative w-full max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-2xl bg-white border-4 border-white">
+                                            <img
+                                                src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=2022&auto=format&fit=crop"
+                                                alt="Education Tree of Knowledge"
+                                                className="w-full h-auto object-cover max-h-[500px]"
+                                            />
+                                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-8 text-white">
+                                                <h2 className="text-3xl font-serif font-bold mb-2">Empowering Minds</h2>
+                                                <p className="text-lg opacity-90">Rooted in knowledge, growing towards success.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid md:grid-cols-2 gap-8">
+                                        <div className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 border-teal-500">
+                                            <h3 className="text-2xl font-serif font-bold text-slate-800 mb-4">Welcome to English is Power</h3>
+                                            <p className="text-slate-600 leading-relaxed">
+                                                We are committed to providing quality educational resources that empower students to excel in their academic journey. Our platform offers comprehensive materials across various subjects, with a special focus on English language mastery and grammar excellence.
+                                            </p>
+                                        </div>
+                                        <div className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 border-amber-500">
+                                            <h3 className="text-2xl font-serif font-bold text-slate-800 mb-4">Our Mission</h3>
+                                            <p className="text-slate-600 leading-relaxed">
+                                                To simplify complex concepts through structured examples and comprehensive guides. Whether you are mastering literature or refining your grammar, our resources are tailored to support your growth.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {resources.length > 0 && (
+                                        <div className="mt-12">
+                                            <h3 className="text-xl font-bold text-slate-700 mb-6 flex items-center gap-2">
+                                                {FolderOpen && <FolderOpen className="text-teal-600" />} Recently Added Content
+                                            </h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                {resources.slice(0, 3).map(res => (
+                                                    <div key={res.id} className="bg-white p-6 rounded-lg shadow border border-slate-100 flex flex-col h-full hover:shadow-md transition-shadow cursor-pointer" onClick={() => setPreviewResource(res)}>
+                                                        <h4 className="font-bold text-slate-800 mb-2 truncate" title={res.title}>{res.title}</h4>
+                                                        <div className="flex justify-between items-center mb-3">
+                                                            <span className="text-xs font-semibold text-teal-600 bg-teal-50 px-2 py-1 rounded w-fit">{res.category}</span>
+                                                            <span className="text-xs text-slate-400">{res.uploadDate}</span>
+                                                        </div>
+                                                        <p className="text-sm text-slate-500 line-clamp-3 mb-4 flex-grow">
+                                                            {res.description}
+                                                        </p>
+                                                        <div className="mt-auto flex items-center text-teal-600 text-sm font-medium">
+                                                            Read More {Eye && <Eye size={14} className="ml-1" />}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                    )}
+
+                                {/* Admin Panel */}
+                                {activeSection === 'admin' && (
+                                    <div className="animate-fade-in">
+                                        <AdminPanel resources={resources} onUpload={handleUpload} onDelete={handleDelete} />
+                                    </div>
+                                )}
+
+                                {/* Dynamic Resource Sections */}
+                                {activeSection !== 'home' && activeSection !== 'admin' && (
+                                    <div className="animate-fade-in">
+                                        <div className="mb-8 border-b pb-4 border-slate-200">
+                                            <h2 className="text-3xl font-serif font-bold text-slate-800">{getSectionTitle(activeSection)}</h2>
+                                            <p className="text-slate-500 mt-2">Explore content in this category.</p>
+                                        </div>
+
+                                        {filteredResources.length === 0 ? (
+                                            <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-slate-100">
+                                                <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                    {FolderOpen && <FolderOpen size={40} className="text-slate-300" />}
+                                                </div>
+                                                <h3 className="text-lg font-medium text-slate-600">No content available yet</h3>
+                                                <p className="text-slate-400 text-sm mt-1">Check back later.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                {filteredResources.map(resource => (
+                                                    <div key={resource.id} className="bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden group h-full">
+                                                        <div className="p-6 flex-grow flex flex-col">
+                                                            <div className="flex items-start justify-between mb-4">
+                                                                <div className="w-12 h-12 bg-teal-50 text-teal-600 rounded-lg flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-colors duration-300">
+                                                                    {FileText && <FileText size={24} />}
+                                                                </div>
+                                                                <span className="text-xs font-medium text-slate-400 bg-slate-50 px-2 py-1 rounded">
+                                                                    Article
+                                                                </span>
+                                                            </div>
+
+                                                            <h3 className="font-bold text-lg text-slate-800 mb-2 line-clamp-2" title={resource.title}>
+                                                                {resource.title}
+                                                            </h3>
+                                                            <p className="text-sm text-slate-500 line-clamp-4 mb-4 flex-grow">
+                                                                {resource.description || "Click to read more..."}
+                                                            </p>
+
+                                                            <div className="text-xs text-slate-400 flex flex-col gap-1 mt-auto">
+                                                                <span>Date: {resource.uploadDate}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="bg-slate-50 p-4 border-t border-slate-100 flex gap-3">
+                                                            <button
+                                                                onClick={() => setPreviewResource(resource)}
+                                                                className="flex-1 flex items-center justify-center gap-2 bg-teal-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors shadow-sm"
+                                                            >
+                                                                {Eye && <Eye size={16} />} Read
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </main>
+
+                            <Footer />
+
+                            <PreviewModal
+                                resource={previewResource}
+                                isOpen={!!previewResource}
+                                onClose={() => setPreviewResource(null)}
+                            />
+                    </div>
+                    );
+                                        };
+
+
+
+                    const root = ReactDOM.createRoot(document.getElementById('root'));
+                    root.render(<App />);
+    </script>
+</body>
+
+</html>
